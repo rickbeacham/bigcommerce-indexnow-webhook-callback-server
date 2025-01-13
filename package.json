@@ -1,0 +1,17 @@
+{
+  "name": "hello-ngrok",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
+    "dotenv": "^16.4.7",
+    "node-fetch": "^3.3.2"
+  }
+}
