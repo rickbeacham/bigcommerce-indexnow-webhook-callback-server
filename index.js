@@ -1,6 +1,20 @@
 const http = require('http');
 const ngrok = require('@ngrok/ngrok');
 
+import dotenv from 'dotenv';
+
+// Load environment variables from a .env file
+dotenv.config();
+
+// Use environment variables for sensitive information
+const NGROK_AUTHTOKEN = process.env.NGROK_AUTHTOKEN;
+const BIGCOMMERCE_API_ACCESS_TOKEN = process.env.BIGCOMMERCE_API_ACCESS_TOKEN;
+const BIGCOMMERCE_API_STORE_HASH = process.env.BIGCOMMERCE_API_STORE_HASH;
+const INDEX_NOW_API_KEY = process.env.INDEX_NOW_API_KEY;
+const INDEX_NOW_KEY_LOCATION_URL = process.env.INDEX_NOW_KEY_LOCATION_URL;
+const BASE_URL = process.env.BASE_URL; 
+
+
 // Create webserver
 http.createServer((req, res) => {
 	res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -14,8 +28,6 @@ ngrok.connect({ addr: 8080, authtoken_from_env: true })
 const http = require('http');
 const ngrok = require('@ngrok/ngrok');
 	
-// Hardcode the NGROK authtoken
-const NGROK_AUTHTOKEN = '';
 	
 // Create webserver
 const server = http.createServer((req, res) => {
