@@ -1,3 +1,4 @@
+// utils.js
 export function validateEnvVariables(requiredEnvVars) {
     requiredEnvVars.forEach(varName => {
         if (!process.env[varName]) {
