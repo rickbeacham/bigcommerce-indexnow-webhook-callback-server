@@ -122,7 +122,53 @@ const server = http.createServer(async (req, res) => {
             if (submittedUrls.length > 0) {
                 await submitToIndexNow(submittedUrls);
             }
+            
+            // Memory Leaks... 
+            
+            /* 
+            Set for setTimeout - 
+            Sets only store unique values and provide 
+            efficient add and has operations. The Set itself doesn't inherently 
+            cause memory leaks if items are properly removed.
+            */
 
+            /*  
+            setTimeout for Expiry -  
+            setTimeout is the standard way to schedule a function 
+            to be executed after a delay in JavaScript. In this case, it's used to schedule 
+            the removal of a webhook hash from the processedWebhookHashes set.
+            */  
+           
+            /* 
+            Closure over data.hash - 
+            The setTimeout creates a closure over the data.hash value 
+            at the time the setTimeout function is called. This ensures that even if the original 
+            data object changes or goes out of scope, the correct hash value is used when 
+            processedWebhookHashes.delete(data.hash) is executed. 
+            */
+
+            /* 
+            NOTICE: Why This Implementation Is Likely Memory-Safe 
+            Explicit Removal - 
+            The code explicitly removes the hash from the processedWebhookHashes
+            set using processedWebhookHashes.delete(data.hash) after the specified BLOCKLIST_EXPIRY_MS.
+            Set Behavior: The delete() method of a Set removes the element if it exists. Attempting to 
+            delete a non-existent element has no adverse effect. No Unbounded Growth: As long as the 
+            setTimeout callbacks are executed (which is the normal behavior of Node.js event loop), 
+            the processedWebhookHashes set should not grow indefinitely. Hashes are added when a new 
+            webhook is processed and removed after their expiry time.
+            */ 
+
+            /* 
+            Potential (Minor) Considerations -
+            System Clock Changes: If the system clock is significantly altered backward, the setTimeout 
+            might execute earlier than expected. However, this is an edge case and not a memory leak issue.
+            High Volume of Unique Webhooks: If you receive a very high volume of unique webhooks within a 
+            short time, the processedWebhookHashes set might temporarily grow large. This isn't a leak but 
+            could be a performance consideration if the memory usage becomes excessive. 
+            The BLOCKLIST_EXPIRY_MS helps to manage this.
+            */
+           
             if (data && data.hash) {
                 processedWebhookHashes.add(data.hash);
                 setTimeout(() => {
