@@ -12,7 +12,8 @@ const BIGCOMMERCE_API_ACCESS_TOKEN = process.env.BIGCOMMERCE_API_ACCESS_TOKEN;
 const BIGCOMMERCE_API_STORE_HASH = process.env.BIGCOMMERCE_API_STORE_HASH;
 const INDEX_NOW_API_KEY = process.env.INDEX_NOW_API_KEY;
 const INDEX_NOW_KEY_LOCATION_URL = process.env.INDEX_NOW_KEY_LOCATION_URL;
-const BASE_URL = process.env.BASE_URL; 
+const BASE_URL = process.env.BASE_URL;
+const BIGCOMMERCE_WEBHOOK_AUTHORIZATION = process.env.BIGCOMMERCE_WEBHOOK_AUTHORIZATION;
 
 if (!NGROK_AUTHTOKEN) {
     throw new Error('NGROK_AUTHTOKEN is not defined in the environment variables.');
@@ -32,7 +33,9 @@ if (!INDEX_NOW_KEY_LOCATION_URL) {
 if (!BASE_URL) {
     throw new Error('BASE_URL is not defined in the environment variables.');
 }
-
+if (!BIGCOMMERCE_WEBHOOK_AUTHORIZATION) {
+    throw new Error('BIGCOMMERCE_WEBHOOK_AUTHORIZATION is not defined in the environment variables.');
+}
 
 console.log("Store Hash:", BIGCOMMERCE_API_STORE_HASH);
 console.log("Access Token:", BIGCOMMERCE_API_ACCESS_TOKEN);
@@ -42,7 +45,6 @@ console.log("IndexNow BASE URL:", BASE_URL);
 
 // Dynamically import node-fetch
 const fetch = (await import('node-fetch')).default;
-
 
 // Function to submit URLs to IndexNow
 async function submitToIndexNow(urlList, apiKey, baseUrl, keyLocationUrl) {
@@ -192,6 +194,15 @@ const BLOCKLIST_EXPIRY_MS = 60 * 1000; // Example: Keep hashes for 60 seconds
 
 const server = http.createServer(async (req, res) => {
     if (req.method === 'POST') {
+        // ** ADD AUTHORIZATION CHECK HERE **
+        const authHeader = req.headers.authorization;
+        if (authHeader !== BIGCOMMERCE_WEBHOOK_AUTHORIZATION) {
+            console.warn('Unauthorized webhook request received. Invalid Authorization header.');
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'error', message: 'Unauthorized' }));
+            return; // Stop processing the request
+        }
+
         let body = '';
 
         req.on('data', (chunk) => {
@@ -203,7 +214,7 @@ const server = http.createServer(async (req, res) => {
                 const data = JSON.parse(body);
 
                 // Check if the webhook has already been processed using BigCommerce's hash
-                if (data && data.hash && processedWebhookHashes.has(data.hash) && data.producer === `stores/${BIGCOMMERCE_API_STORE_HASH}`) {
+                if (data && data.hash && processedWebhookHashes.has(data.hash) ) {
                     console.log(`Duplicate webhook received (hash: ${data.hash}, scope: ${data.scope}). Ignoring.`);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ status: 'success', message: 'Duplicate ignored' }));
@@ -379,4 +390,4 @@ process.on('SIGINT', () => {
         console.log('Server closed');
         process.exit(0);
     });
-});                                                                                                
+});
