@@ -1,14 +1,39 @@
+// services.js
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
 import { logError, logInfo } from './utils.js';
+import { env } from './index.js';
 
-dotenv.config();
+const {
+    BIGCOMMERCE_API_STORE_HASH,
+    BIGCOMMERCE_API_ACCESS_TOKEN,
+    INDEX_NOW_API_KEY,
+    INDEX_NOW_KEY_LOCATION_URL,
+    BASE_URL,
+} = env;
 
-const BIGCOMMERCE_API_STORE_HASH = process.env.BIGCOMMERCE_API_STORE_HASH;
-const BIGCOMMERCE_API_ACCESS_TOKEN = process.env.BIGCOMMERCE_API_ACCESS_TOKEN;
-const INDEX_NOW_API_KEY = process.env.INDEX_NOW_API_KEY;
-const INDEX_NOW_KEY_LOCATION_URL = process.env.INDEX_NOW_KEY_LOCATION_URL;
-const BASE_URL = process.env.BASE_URL;
+async function bigCommerceApiFetch(path) {
+    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/${path}`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Auth-Token': BIGCOMMERCE_API_ACCESS_TOKEN
+        }
+    };
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            const message = `BigCommerce API Error: ${response.status} at ${url}`;
+            logError(message);
+            throw new Error(message);
+        }
+        return await response.json();
+    } catch (error) {
+        logError(`Error fetching from BigCommerce API: ${error.message}`);
+        throw error;
+    }
+}
 
 export async function submitToIndexNow(urlList) {
     if (!Array.isArray(urlList) || urlList.length === 0) {
@@ -42,8 +67,12 @@ export async function submitToIndexNow(urlList) {
             return true;
         } else {
             logError('Error submitting to IndexNow:', response.status, response.statusText);
-            const responseBody = await response.text();
-            logError('IndexNow Response Body:', responseBody);
+            try {
+                const responseBody = await response.text();
+                logError('IndexNow Response Body:', responseBody);
+            } catch (err) {
+                logError('Failed to read IndexNow response body:', err);
+            }
 
             if (response.status === 400) {
                 logError("Possible reasons: Invalid API key, incorrect URL format, exceeding URL limit.");
@@ -63,80 +92,38 @@ export async function submitToIndexNow(urlList) {
 }
 
 export async function getCategoryUrlById(categoryId) {
-    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/categories/${categoryId}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Auth-Token': BIGCOMMERCE_API_ACCESS_TOKEN
-        }
-    };
-
     try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const category = await response.json();
+        const category = await bigCommerceApiFetch(`categories/${categoryId}`);
         const urlPath = category.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         logInfo('Get Category URL by ID = ', fullUrl);
         return fullUrl;
     } catch (error) {
-        logError('Error fetching category:', error);
+        logError(`Error fetching category with ID ${categoryId}: ${error.message}`);
         throw error;
     }
 }
 
 export async function getProductUrlById(productId) {
-    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/products/${productId}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Auth-Token': BIGCOMMERCE_API_ACCESS_TOKEN
-        }
-    };
-
     try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const product = await response.json();
+        const product = await bigCommerceApiFetch(`products/${productId}`);
         const urlPath = product.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         return fullUrl;
     } catch (error) {
-        logError('Error fetching product:', error);
+        logError(`Error fetching product with ID ${productId}: ${error.message}`);
         throw error;
     }
 }
 
 export async function getPageUrlById(pageId) {
-    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/content/pages/${pageId}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Auth-Token': BIGCOMMERCE_API_ACCESS_TOKEN
-        }
-    };
-
     try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const page = await response.json();
+        const page = await bigCommerceApiFetch(`../../../content/pages/${pageId}`); // Adjust path if needed
         const urlPath = page.data.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         return fullUrl;
     } catch (error) {
-        logError('Error fetching page:', error);
+        logError(`Error fetching page with ID ${pageId}: ${error.message}`);
         throw error;
     }
 }
