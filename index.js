@@ -14,6 +14,31 @@ const INDEX_NOW_API_KEY = process.env.INDEX_NOW_API_KEY;
 const INDEX_NOW_KEY_LOCATION_URL = process.env.INDEX_NOW_KEY_LOCATION_URL;
 const BASE_URL = process.env.BASE_URL; 
 
+if (!NGROK_AUTHTOKEN) {
+    throw new Error('NGROK_AUTHTOKEN is not defined in the environment variables.');
+}
+if (!BIGCOMMERCE_API_ACCESS_TOKEN) {
+    throw new Error('BIGCOMMERCE_API_ACCESS_TOKEN is not defined in the environment variables.');
+}
+if (!BIGCOMMERCE_API_STORE_HASH) {
+    throw new Error('BIGCOMMERCE_API_STORE_HASH is not defined in the environment variables.');
+}
+if (!INDEX_NOW_API_KEY) {
+    throw new Error('INDEX_NOW_API_KEY is not defined in the environment variables.');
+}
+if (!INDEX_NOW_KEY_LOCATION_URL) {
+    throw new Error('INDEX_NOW_KEY_LOCATION_URL is not defined in the environment variables.');
+}
+if (!BASE_URL) {
+    throw new Error('BASE_URL is not defined in the environment variables.');
+}
+
+
+console.log("Store Hash:", BIGCOMMERCE_API_STORE_HASH);
+console.log("Access Token:", BIGCOMMERCE_API_ACCESS_TOKEN);
+console.log("IndexNow API Key:", INDEX_NOW_API_KEY);
+console.log("IndexNow Key Location URL:", INDEX_NOW_KEY_LOCATION_URL);
+console.log("IndexNow BASE URL:", BASE_URL);
 
 // Create webserver
 http.createServer((req, res) => {
