@@ -1,17 +1,10 @@
 // services.js
 import fetch from 'node-fetch';
 import { logError, logInfo } from './utils.js';
-import { env } from './index.js';
 
-const {
-    BIGCOMMERCE_API_STORE_HASH,
-    BIGCOMMERCE_API_ACCESS_TOKEN,
-    INDEX_NOW_API_KEY,
-    INDEX_NOW_KEY_LOCATION_URL,
-    BASE_URL,
-} = env;
+// Remove the import of 'env' and access to it here
 
-async function bigCommerceApiFetch(path) {
+async function bigCommerceApiFetch(path, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN) {
     const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/${path}`;
     const options = {
         method: 'GET',
@@ -35,7 +28,7 @@ async function bigCommerceApiFetch(path) {
     }
 }
 
-export async function submitToIndexNow(urlList) {
+export async function submitToIndexNow(urlList, INDEX_NOW_API_KEY, INDEX_NOW_KEY_LOCATION_URL, BASE_URL) {
     if (!Array.isArray(urlList) || urlList.length === 0) {
         logError("Invalid or empty URL list provided. Skipping IndexNow submission.");
         return false;
@@ -91,9 +84,9 @@ export async function submitToIndexNow(urlList) {
     }
 }
 
-export async function getCategoryUrlById(categoryId) {
+export async function getCategoryUrlById(categoryId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
     try {
-        const category = await bigCommerceApiFetch(`categories/${categoryId}`);
+        const category = await bigCommerceApiFetch(`categories/${categoryId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = category.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         logInfo('Get Category URL by ID = ', fullUrl);
@@ -104,9 +97,9 @@ export async function getCategoryUrlById(categoryId) {
     }
 }
 
-export async function getProductUrlById(productId) {
+export async function getProductUrlById(productId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
     try {
-        const product = await bigCommerceApiFetch(`products/${productId}`);
+        const product = await bigCommerceApiFetch(`products/${productId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = product.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         return fullUrl;
@@ -116,9 +109,9 @@ export async function getProductUrlById(productId) {
     }
 }
 
-export async function getPageUrlById(pageId) {
+export async function getPageUrlById(pageId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
     try {
-        const page = await bigCommerceApiFetch(`../../../content/pages/${pageId}`); // Adjust path if needed
+        const page = await bigCommerceApiFetch(`../../../content/pages/${pageId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = page.data.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         return fullUrl;
