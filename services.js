@@ -2,8 +2,6 @@
 import fetch from 'node-fetch';
 import { logError, logInfo } from './utils.js';
 
-// Remove the import of 'env' and access to it here
-
 async function bigCommerceApiFetch(path, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN) {
     const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/${path}`;
     const options = {
@@ -85,6 +83,9 @@ export async function submitToIndexNow(urlList, INDEX_NOW_API_KEY, INDEX_NOW_KEY
 }
 
 export async function getCategoryUrlById(categoryId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
+    if (!categoryId || !BIGCOMMERCE_API_STORE_HASH || !BIGCOMMERCE_API_ACCESS_TOKEN || !BASE_URL) {
+        throw new Error('Invalid input parameters sent to getCategoryUrlById');
+    }
     try {
         const category = await bigCommerceApiFetch(`categories/${categoryId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = category.data.custom_url.url;
@@ -98,10 +99,14 @@ export async function getCategoryUrlById(categoryId, BIGCOMMERCE_API_STORE_HASH,
 }
 
 export async function getProductUrlById(productId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
+    if (!productId || !BIGCOMMERCE_API_STORE_HASH || !BIGCOMMERCE_API_ACCESS_TOKEN || !BASE_URL) {
+        throw new Error('Invalid input parameters in getProductUrlById');
+    }
     try {
         const product = await bigCommerceApiFetch(`products/${productId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = product.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
+        logInfo('Get Product URL by ID = ', fullUrl);
         return fullUrl;
     } catch (error) {
         logError(`Error fetching product with ID ${productId}: ${error.message}`);
@@ -110,10 +115,14 @@ export async function getProductUrlById(productId, BIGCOMMERCE_API_STORE_HASH, B
 }
 
 export async function getPageUrlById(pageId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
+    if (!pageId || !BIGCOMMERCE_API_STORE_HASH || !BIGCOMMERCE_API_ACCESS_TOKEN || !BASE_URL) {
+        throw new Error('Invalid input parameters in getPageUrlById');
+    }
     try {
-        const page = await bigCommerceApiFetch(`../../../content/pages/${pageId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
+        const page = await bigCommerceApiFetch(`content/pages/${pageId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = page.data.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
+        logInfo('Get Page URL by ID = ', fullUrl);
         return fullUrl;
     } catch (error) {
         logError(`Error fetching page with ID ${pageId}: ${error.message}`);
