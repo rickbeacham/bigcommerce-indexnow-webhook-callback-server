@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { logError, logInfo } from './utils.js';
 
 async function bigCommerceApiFetch(path, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN) {
-    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/catalog/${path}`;
+    const url = `https://api.bigcommerce.com/stores/${BIGCOMMERCE_API_STORE_HASH}/v3/${path}`;
     const options = {
         method: 'GET',
         headers: {
@@ -84,10 +84,10 @@ export async function submitToIndexNow(urlList, INDEX_NOW_API_KEY, INDEX_NOW_KEY
 
 export async function getCategoryUrlById(categoryId, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL) {
     if (!categoryId || !BIGCOMMERCE_API_STORE_HASH || !BIGCOMMERCE_API_ACCESS_TOKEN || !BASE_URL) {
-        throw new Error('Invalid input parameters sent to getCategoryUrlById');
+        throw new Error('Invalid input parameters in getCategoryUrlById');
     }
     try {
-        const category = await bigCommerceApiFetch(`categories/${categoryId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
+        const category = await bigCommerceApiFetch(`catalog/categories/${categoryId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = category.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         logInfo('Get Category URL by ID = ', fullUrl);
@@ -103,7 +103,7 @@ export async function getProductUrlById(productId, BIGCOMMERCE_API_STORE_HASH, B
         throw new Error('Invalid input parameters in getProductUrlById');
     }
     try {
-        const product = await bigCommerceApiFetch(`products/${productId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
+        const product = await bigCommerceApiFetch(`catalog/products/${productId}`, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN);
         const urlPath = product.data.custom_url.url;
         const fullUrl = `${BASE_URL}${urlPath}`;
         logInfo('Get Product URL by ID = ', fullUrl);
