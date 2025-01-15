@@ -76,6 +76,8 @@ const server = http.createServer(async (req, res) => {
             }
 
             // Verify the timestamp to prevent replay attacks
+
+            /*
             const currentTimestamp = Math.floor(Date.now() / 1000);
             const timestampDifference = currentTimestamp - parseInt(webhookHeaders['x-bc-timestamp'], 10);
             const isTimestampValid = Math.abs(timestampDifference) < 300; // Allow a 5-minute window
@@ -84,7 +86,7 @@ const server = http.createServer(async (req, res) => {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ status: 'error', message: 'Timestamp is invalid' }));
                 return;
-            }
+            }*/
 
             const data = JSON.parse(webhookPayload);
 
@@ -128,10 +130,10 @@ const server = http.createServer(async (req, res) => {
                     }
                     break;
 
-                case 'store/channel/1/page/updated/created':
+                case 'store/channel/1/page/created':
                 case 'store/channel/1/page/updated':
                     try {
-                        const pageUrl = await getPageUrlById(data.resource_id, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL);
+                        const pageUrl = await getPageUrlById(data.data.page_id, BIGCOMMERCE_API_STORE_HASH, BIGCOMMERCE_API_ACCESS_TOKEN, BASE_URL);
                         logInfo('Page URL:', pageUrl);
                         submittedUrls.push(pageUrl);
                     } catch (error) {
