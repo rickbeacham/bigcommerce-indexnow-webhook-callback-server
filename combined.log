@@ -1,0 +1,3 @@
+{"level":"info","message":"Node.js web server at 8080 is running...","timestamp":"2025-01-15T21:34:22.728Z"}
+{"level":"info","message":"Ingress established at: https://528a-207-173-19-44.ngrok-free.app","timestamp":"2025-01-15T21:34:23.023Z"}
+{"level":"info","message":"Shutting down gracefully...","timestamp":"2025-01-15T21:34:40.806Z"}
